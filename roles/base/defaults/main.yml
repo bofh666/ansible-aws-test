@@ -1,0 +1,10 @@
+# roles/base/defaults/main.yml
+---
+do_reboot: yes
+
+install_packages:
+  - docker
+  - python2-pip
+  - postgresql
+  
+remove_packages: null

@@ -1,0 +1,29 @@
+# roles/base/tasks/upgrade.yml
+---
+- name: Upgrading system packages
+  yum:
+    name: "*"
+    state: latest
+
+- name: Cheking if reboot is needed
+  command: needs-restarting -r
+  register: upgraded
+  ignore_errors: yes
+
+- name: Rebooting if needed
+  shell: sleep 2 && reboot
+  async: 1
+  poll: 0
+  when: do_reboot and upgraded.rc == 1
+  ignore_errors: true
+  register: rebooting
+
+- name: Waiting for hosts to come up
+  become: no
+  local_action:
+    module: wait_for
+    host: "{{ ansible_host }}"
+    port: 22
+    delay: 42
+    state: started
+  when: rebooting.changed

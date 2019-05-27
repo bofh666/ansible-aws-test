@@ -1,0 +1,24 @@
+# roles/base/tasks/main.yml
+---
+- name: Upgrading OS
+  include: upgrade.yml
+  tags: upgrade
+
+- name: Installing packages
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items: "{{ install_packages }}"
+
+- name: Removing packages
+  yum:
+    name: "{{ item }}"
+    state: removed
+  with_items: "{{ remove_packages }}"
+  when : remove_packages
+
+- name: Making sure Docker is enabled and running
+  systemd:
+    service: docker
+    enabled: yes
+    state: started

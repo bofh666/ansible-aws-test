@@ -1,0 +1,34 @@
+# roles/db/tasks/main.yml
+---
+- name: Installing required Python module
+  pip:
+    name: psycopg2-binary
+    state: present
+
+- name: Creating .pgpass
+  template:
+    src: pgpass.j2
+    dest: /root/.pgpass
+    mode: 0400
+
+- name: Creating database
+  command: psql -h {{ rds_address }} -U postgres -c "CREATE DATABASE {{ rds_database }}"
+  run_once: yes
+  ignore_errors: yes
+
+- name: Creating user
+  command: psql -h {{ rds_address }} -U postgres -c "CREATE USER {{ rds_username }} WITH NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS PASSWORD '{{ rds_password }}'"
+  run_once: yes
+  ignore_errors: yes
+
+- name: Granting create/delete tables priveleges
+  command: psql -h {{ rds_address }} -U postgres -d {{ rds_database }} -c "GRANT CREATE, USAGE ON SCHEMA public TO {{ rds_username }}"
+  run_once: yes
+
+- name: Granting CRUD privileges on newly created tables
+  command: psql -h {{ rds_address }} -U postgres -d {{ rds_database }} -c "ALTER DEFAULT PRIVILEGES GRANT INSERT, SELECT, UPDATE, DELETE ON TABLES TO {{ rds_username }}"
+  run_once: yes
+
+- name: Granting CRUD privileges on existing tables
+  command: psql -h {{ rds_address }} -U postgres -d {{ rds_database }} -c "GRANT INSERT, SELECT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {{ rds_username }}"
+  run_once: yes

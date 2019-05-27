@@ -1,0 +1,8 @@
+# deploy.yml
+---
+- name: Infrastructure provisioning
+  hosts: security_group_instances
+  roles:
+    - { role: base, tags: ['base'] }
+    - { role: db, tags: ['db'] }
+    - { role: docker, tags: ['docker'] }

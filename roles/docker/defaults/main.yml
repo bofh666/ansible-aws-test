@@ -1,0 +1,5 @@
+# roles/docker/defaults/main.yml
+---
+docker_image: adminer
+docker_name: adminer
+rds_address: terraform-20190526223603071600000001.cdnevts7pzxe.eu-west-1.rds.amazonaws.com
